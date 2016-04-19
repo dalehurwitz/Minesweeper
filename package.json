@@ -1,0 +1,24 @@
+{
+  "name": "minesweeper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dalehurwitz/Minesweeper.git"
+  },
+  "author": "Dale Hurwitz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dalehurwitz/Minesweeper/issues"
+  },
+  "homepage": "https://github.com/dalehurwitz/Minesweeper#readme",
+  "devDependencies": {
+    "browser-sync": "^2.12.3",
+    "gulp": "^3.9.1",
+    "gulp-less": "^3.0.5"
+  }
+}
