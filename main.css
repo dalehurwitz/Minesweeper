@@ -2,3 +2,25 @@ body {
   margin: 0;
   padding: 0;
 }
+.minesweeper__board {
+  overflow: auto;
+}
+.minesweeper__board.cols-15 {
+  width: 375px;
+}
+.minesweeper__board.rows-15 {
+  height: 375px;
+}
+.minesweeper__tile {
+  width: 25px;
+  height: 25px;
+  float: left;
+  box-sizing: border-box;
+  border: 1px solid grey;
+  text-align: center;
+  line-height: 25px;
+  cursor: pointer;
+}
+.minesweeper__tile.is-bomb {
+  background: #999;
+}
