@@ -2,17 +2,29 @@
 
 var gulp = require("gulp"),
 	browserSync = require("browser-sync"),
-    less = require("gulp-less");
+    less = require("gulp-less"),
+	babel = require("gulp-babel");
 
 var config = {
-	js: "./minesweeper.js",
+	js: [
+		"./minesweeper.js"
+	],
     mainLess: "./main.less"
 };
 
 gulp.task("default", ["browserSync"], function() {
-	gulp.watch(config.js, browserSync.reload);
+	gulp.watch(config.js, ["js"]);
     gulp.watch(config.mainLess, ["less"]);
 });
+
+gulp.task("js", function() {
+	return gulp.src(config.js)
+		.pipe(babel({
+			presets: ["es2015"]
+		}))
+		.pipe(gulp.dest("./dist"))
+		.pipe(browserSync.stream());
+})
 
 gulp.task("less", function() {
     return gulp.src(config.mainLess)
