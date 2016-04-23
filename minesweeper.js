@@ -48,50 +48,88 @@ class Minesweeper {
 	}
 	
 	generateGame(x, y) {
-		var totalBombs = Math.ceil(this.TILES_X * this.TILES_Y * this.bombRatio),
+		var numBombs = Math.ceil(this.TILES_X * this.TILES_Y * this.bombRatio),
 			bombTiles = [],
-			neighbours = this.getNeighbourTiles(x, y);
+            potentialBombTiles = [],
+			offLimitTiles = [];
 		
-		var x = 250;
-		
-		while(bombTiles.length < totalBombs) {
-			console.log(bombTiles.length);
-			var randomTileIndex = Math.ceil(Math.random() * totalBombs) - 1,
-				toContinue = false;
-			
-			//Try again if we've already created a bomb on this tile
-			if(bombTiles.indexOf(randomTileIndex) > -1) continue;
-			
-			//Check that we're not trying to place a bomb on a neighbouring tile
-			for(var i = 0; i < neighbours.length; i++) {
-				if(neighbours[i].tileIndex === randomTileIndex) {
-					toContinue = true;
-					break;
-				}
-			}
-			
-			if(toContinue) continue;
-
-			bombTiles.push(randomTileIndex);
-			
-		}
-		
+        console.log(x, y);
+        //Let's store all the offLimitTiles index's for easy reference
+		offLimitTiles = this.getNeighbourTiles(x, y).map((tile) => {
+            return tile.tileIndex;
+        });
+        
+        //Don't forget to add the center tile
+        offLimitTiles.push(this.getTileIndex(x, y));
+        
+        //Create an array with all possible tiles on which we can place a bomb (i.e. no direct neighbours)
+        for(var i = 0, len = this.TILES.length; i < len; i++) {
+            if(offLimitTiles.indexOf(i) > -1) continue;           
+            potentialBombTiles.push(i);
+        }
+        
+        potentialBombTiles = Minesweeper.shuffle(potentialBombTiles);
+        
+        //Pick the first 'numBombs' tile index's from the shuffled potentialBombTiles array
+        bombTiles = potentialBombTiles.splice(0, numBombs);
+        
+        bombTiles.map((i) => {
+            this.updateTileState(i, {isBomb: true});
+            this.TILES[i].elem.style.background = "red";
+        });
+        
 		this.GAME_STARTED = true;
 	}
+    
+    static shuffle(array) {
+        var max = array.length, 
+            temp, 
+            rand;
+
+        while (max > 0) {
+
+            // Pick a remaining element…
+            rand = Math.floor(Math.random() * max--);
+
+            // And swap it with the last element.
+            temp = array[max];
+            array[max] = array[rand];
+            array[rand] = temp;
+        }
+
+        return array;
+    }
 	
 	bindTileClick() {
 		var allTiles = this.GAME_CONTAINER.getElementsByClassName("minesweeper__tile");	
 		
 		for(let i = 0; i < this.TILES.length; i++) {
-			this.TILES[i].elem = allTiles[i];
-			this.TILES[i].elem.addEventListener("click", () => {
+            let tile = this.TILES[i];
+			tile.elem = allTiles[i];
+			tile.elem.addEventListener("click", (e) => {
 				
-				if(!this.GAME_STARTED) {
-					this.generateGame(this.TILES[i].x, this.TILES[i].y);
-				}
-				return;
-				this.sweep(i);
+                switch(true) {
+                    case !this.GAME_STARTED:
+                        this.generateGame(tile.x, tile.y);
+                        break;
+                    case tile.isCleared:
+                        return;
+                    case tile.isBomb:
+                        console.log("GAME OVER");
+                        return;
+                }
+                
+                var tilesToRender = this.sweep(i);
+                this.renderTiles(tilesToRender);
+                
 			});
+            
+            //Right click
+            tile.elem.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                tile.isFlagged = !tile.isFlagged;
+                this.renderTiles([i]);
+            }, false);
 		}
 	}
 	
@@ -105,8 +143,15 @@ class Minesweeper {
 	getTileIndex(x, y) {
 		return (y * this.TILES_Y) + x;
 	}
+    
+    updateTileState(tileIndex, state) {
+        for(var prop in state) {
+            this.TILES[tileIndex][prop] = state[prop];
+        }
+    }
 	
 	getNeighbourTiles(x, y) {
+        
 		var neighbours = [];
 		
 		for(var i = 0; i < this.neighbourOffsets.length; i++) {
@@ -124,34 +169,39 @@ class Minesweeper {
 		return neighbours;
 	}
 	
-	updateTiles() {
-		
+	renderTiles(tiles) {
+		tiles.map((index) => {
+            var tile = this.TILES[index],
+                tileBg = "";
+            
+            if(tile.isCleared) {
+                tileBg = "#e2e2e2";
+            } else if(tile.isFlagged) {
+                tileBg = "pink";
+            } else {
+                tileBg = "#fff";
+            }
+            
+            tile.elem.style.backgroundColor = tileBg;
+            
+            if(tile.neighbouringBombs) {
+                tile.elem.innerHTML = tile.neighbouringBombs;
+            }
+        });
 	}
 	
 	sweep(index) {
 		var x = index % this.TILES_X,
 			y = Math.floor(index / this.TILES_Y),
-			neighbourOffsets = [
-				{y:-1, x:-1}, {y:-1, x:0}, 
-				{y:-1, x:1}, {y:0, x:-1}, 
-				{y:0, x:1}, {y:1, x:-1}, 
-				{y:1, x:0}, {y:1, x:1}
-			],
 			queue = [{x:x, y:y}],
-			clearedTiles = [],
+			sweptTiles = [],
 			alreadyChecked = [];
-		
+        
 		for(var i = 0; i < queue.length; i++) {
 			checkNeighboursForBombs.call(this, queue[i].x, queue[i].y);
 		}
-		
-		clearedTiles.map((tile) => {
-			var tileIndex = (tile.y * this.TILES_Y) + tile.x;
-			this.TILES[tileIndex].style.backgroundColor = "blue";
-			if(tile.bombs) {
-				this.TILES[tileIndex].innerHTML = tile.bombs;
-			}
-		});
+        
+        return sweptTiles;
 		
 		function checkNeighboursForBombs(x, y) {
 			var tileKey = String(x) + String(y); //Lets store the x and y index as a string literal
@@ -161,33 +211,28 @@ class Minesweeper {
 			alreadyChecked.push(tileKey);
 			
 			var numBombs = 0,
-				neighbours = []; //Let's keep track of neighbours in case we need to add them to queue later
+				neighbours = this.getNeighbourTiles(x, y);
 			
-			for(var i = 0; i < neighbourOffsets.length; i++) {
-				var xOffset = x + neighbourOffsets[i].x;
-				var yOffset = y + neighbourOffsets[i].y;
+			for(var i = 0; i < neighbours.length; i++) {
+				var tileIndex = neighbours[i].tileIndex;
 				
-				//If we're out of bounds, continue onto the next iteration
-				if(xOffset < 0 || xOffset > this.TILES_X-1 || yOffset < 0 || yOffset > this.TILES_Y-1) {
-					continue;
-				}
-				
-				if(this.GAME_BOARD[yOffset][xOffset] === 5) {
+				if(this.TILES[tileIndex].isBomb) {
 					numBombs++;
-				}
-				
-				//Stop worrying about neighbours if we've discovered bombs
-				if(numBombs === 0) {
-					neighbours.push({x: xOffset, y: yOffset});
 				}
 			}
 			
+            var tileIndex = this.getTileIndex(x, y);
+            
+            this.updateTileState(tileIndex, {
+                neighbouringBombs: numBombs,
+                isCleared: true
+            });
+            
 			//Add the current tiles to the list of cleared tiles.
-			clearedTiles.push({x: x, y: y, bombs: numBombs});
+			sweptTiles.push(tileIndex);
 			
 			if(numBombs === 0) {
 				queue = queue.concat(neighbours);
-				clearedTiles = clearedTiles.concat(neighbours);
 			}
 			
 		}
