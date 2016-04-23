@@ -24,12 +24,33 @@ body {
 		float: left;
 		box-sizing: border-box;
 		border: 1px solid grey;
+        background: #e2e2e2;
 		text-align: center;
 		line-height: @tileW;
 		cursor: pointer;
+        font-family: sans-serif;
+        font-weight: bold;
 		
-		&.is-bomb {
-			background: #999;
-		}
+        &.is-cleared {
+            background: #fff;
+            &.bombs {
+                &--1 {
+                    color: blue;
+                }
+                &--2 {
+                    color: green;
+                }
+                &--3 {
+                    color: red;
+                }
+                &--4 {
+                    color: #000;
+                }
+            }
+        }
+        
+        &.is-flagged {
+            background: pink;
+        }
 	}
 }

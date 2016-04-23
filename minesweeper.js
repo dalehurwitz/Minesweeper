@@ -2,10 +2,12 @@ class Minesweeper {
 	constructor(container) {
 		this.GAME_CONTAINER = document.getElementById(container);
 		this.GAME_BOARD; //[y][x]
-		this.TILES = [];
 		this.TILES_X = 15;
 		this.TILES_Y = 15;
-		this.bombRatio = 0.15625;
+        this.TILES = [];
+        this.CLEARED_TILES = 0;
+		this.BOMB_RATIO = 0.15625;
+        this.TOTAL_BOMBS = 0;
 		this.GAME_STARTED = false;
 		this.neighbourOffsets = [
 			{x:-1, y:-1}, {x:0, y:-1}, 
@@ -48,12 +50,12 @@ class Minesweeper {
 	}
 	
 	generateGame(x, y) {
-		var numBombs = Math.ceil(this.TILES_X * this.TILES_Y * this.bombRatio),
-			bombTiles = [],
+		this.TOTAL_BOMBS = Math.ceil(this.TILES_X * this.TILES_Y * this.BOMB_RATIO);
+        
+        var bombTiles = [],
             potentialBombTiles = [],
 			offLimitTiles = [];
 		
-        console.log(x, y);
         //Let's store all the offLimitTiles index's for easy reference
 		offLimitTiles = this.getNeighbourTiles(x, y).map((tile) => {
             return tile.tileIndex;
@@ -71,7 +73,7 @@ class Minesweeper {
         potentialBombTiles = Minesweeper.shuffle(potentialBombTiles);
         
         //Pick the first 'numBombs' tile index's from the shuffled potentialBombTiles array
-        bombTiles = potentialBombTiles.splice(0, numBombs);
+        bombTiles = potentialBombTiles.splice(0, this.TOTAL_BOMBS);
         
         bombTiles.map((i) => {
             this.updateTileState(i, {isBomb: true});
@@ -172,17 +174,21 @@ class Minesweeper {
 	renderTiles(tiles) {
 		tiles.map((index) => {
             var tile = this.TILES[index],
-                tileBg = "";
+                tileClass = "";
             
             if(tile.isCleared) {
-                tileBg = "#e2e2e2";
+                tileClass = " is-cleared";
+                if(tile.neighbouringBombs > 0) {
+                    var numBombs = tile.neighbouringBombs;
+                    tileClass += (" bombs--" + (numBombs > 4 ? 4 : numBombs));
+                }
             } else if(tile.isFlagged) {
-                tileBg = "pink";
+                tileClass = " is-flagged";
             } else {
-                tileBg = "#fff";
+                tile.elem.className = tile.elem.className.replace(/\sis-flagged/g, "");
             }
             
-            tile.elem.style.backgroundColor = tileBg;
+            tile.elem.className += tileClass;
             
             if(tile.neighbouringBombs) {
                 tile.elem.innerHTML = tile.neighbouringBombs;

@@ -17,10 +17,28 @@ body {
   float: left;
   box-sizing: border-box;
   border: 1px solid grey;
+  background: #e2e2e2;
   text-align: center;
   line-height: 25px;
   cursor: pointer;
+  font-family: sans-serif;
+  font-weight: bold;
 }
-.minesweeper__tile.is-bomb {
-  background: #999;
+.minesweeper__tile.is-cleared {
+  background: #fff;
+}
+.minesweeper__tile.is-cleared.bombs--1 {
+  color: blue;
+}
+.minesweeper__tile.is-cleared.bombs--2 {
+  color: green;
+}
+.minesweeper__tile.is-cleared.bombs--3 {
+  color: red;
+}
+.minesweeper__tile.is-cleared.bombs--4 {
+  color: #000;
+}
+.minesweeper__tile.is-flagged {
+  background: pink;
 }
