@@ -1,13 +1,22 @@
 body {
 	margin: 0;
 	padding: 0;
+	font-family: sans-serif;
+}
+
+h1 {
+	text-align: center;
 }
 
 @tileW: 25px;
 
 .minesweeper {
 	&__board {
-		overflow: auto;
+		margin: 50px auto;
+
+		&.cols-30 {
+			width: @tileW * 30;
+		}
 		
 		&.cols-15 {
 			width: @tileW * 15;
@@ -15,6 +24,14 @@ body {
 		
 		&.rows-15 {
 			height: @tileW * 15;
+		}
+
+		&.cols-9 {
+			width: @tileW * 9;
+		}
+
+		&.rows-9 {
+			height: @tileW * 9;
 		}
 	}
 	
@@ -25,12 +42,13 @@ body {
 		box-sizing: border-box;
 		border: 1px solid grey;
         background: #e2e2e2;
+        color: #e2e2e2;
 		text-align: center;
 		line-height: @tileW;
 		cursor: pointer;
         font-family: sans-serif;
         font-weight: bold;
-		
+//		transition: all 0.5s ease;
         &.is-cleared {
             background: #fff;
             &.bombs {
@@ -53,4 +71,23 @@ body {
             background: pink;
         }
 	}
+
+	&__controls {
+		max-width: 300px;
+		font-size: 0;
+		margin: 0 auto;
+		ul {
+			margin: 0;
+			padding: 0;
+		}
+		li {
+			width: 33.333%;
+			display: inline-block;
+			font-size: 16px;
+		}
+		li button {
+			width: 100%;
+		}
+	}
 }
+
