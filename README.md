@@ -8,6 +8,7 @@ A Minesweeper clone built with ES6 JavaScript
 
 `
 npm install
+
 gulp
 `
 
