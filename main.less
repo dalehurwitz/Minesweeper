@@ -13,6 +13,7 @@ h1 {
 .minesweeper {
 	&__board {
 		margin: 50px auto;
+        position: relative;
 
 		&.cols-30 {
 			width: @tileW * 30;
@@ -33,6 +34,10 @@ h1 {
 		&.rows-9 {
 			height: @tileW * 9;
 		}
+
+        &.game-over {
+            animation: gameOver 400ms linear;
+        }
 	}
 	
 	&__tile {
@@ -70,6 +75,14 @@ h1 {
         &.is-flagged {
             background: pink;
         }
+
+        &.is-bomb {
+            border-color: red;
+            background: pink;
+            &.bomb--exploded {
+                background: red;
+            }
+        }
 	}
 
 	&__controls {
@@ -89,5 +102,107 @@ h1 {
 			width: 100%;
 		}
 	}
+}
+
+@-webkit-keyframes gameOver {
+    0% {
+        left: 0;
+    }
+    15% {
+        left: -50px;
+        top: 20px;
+    }
+    30% {
+        left: 30px;
+        top: -15px;
+    }
+    55% {
+        left: -20px;
+        top: 8px;
+    }
+    80% {
+        left: 10px;
+        top: -5px;
+    }
+    100% {
+        left: 0;
+        top: 0;
+    }
+}
+@-o-keyframes gameOver {
+    0% {
+        left: 0;
+    }
+    20% {
+        left: -50px;
+        top: 30px;
+    }
+    40% {
+        left: 30px;
+        top: -20px;
+    }
+    60% {
+        left: -20px;
+        top: 10px;
+    }
+    80% {
+        left: 10px;
+        top: -5px;
+    }
+    100% {
+        left: 0;
+        top: 0;
+    }
+}
+@-moz-keyframes gameOver {
+    0% {
+        left: 0;
+    }
+    20% {
+        left: -50px;
+        top: 30px;
+    }
+    40% {
+        left: 30px;
+        top: -20px;
+    }
+    60% {
+        left: -20px;
+        top: 10px;
+    }
+    80% {
+        left: 10px;
+        top: -5px;
+    }
+    100% {
+        left: 0;
+        top: 0;
+    }
+}
+@keyframes gameOver {
+    0% {
+        left: 0;
+        top: 0;
+    }
+    20% {
+        left: -50px;
+        top: 30px;
+    }
+    40% {
+        left: 30px;
+        top: -20px;
+    }
+    60% {
+        left: -20px;
+        top: 10px;
+    }
+    80% {
+        left: 10px;
+        top: -5px;
+    }
+    100% {
+        left: 0;
+        top: 0;
+    }
 }
 

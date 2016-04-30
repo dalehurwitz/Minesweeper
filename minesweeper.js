@@ -19,7 +19,7 @@ class Minesweeper {
 				BOMB_RATIO: 0.20625
 			}
 		};
-		this.defaults = this.difficultySettings["0"];
+		this.defaults = this.difficultySettings[1];
 		this.neighbourOffsets = [
 			{x:-1, y:-1}, {x:0, y:-1}, 
 			{x:1, y:-1}, {x:-1, y:0}, 
@@ -56,11 +56,12 @@ class Minesweeper {
 		var controls = document.createElement("div");
 
 		controls.className = "minesweeper__controls";
-		controls.innerHTML = '<ul>\
-									<li><button class="minesweeper__dificulty-selector" data-difficulty="0">Beginner</button></li>\
-									<li><button class="minesweeper__dificulty-selector" data-difficulty="1">Intermediate</button></li>\
-									<li><button class="minesweeper__dificulty-selector" data-difficulty="2">Expert</button></li>\
-								</ul>';
+		controls.innerHTML =
+            '<ul>\
+                <li><button class="minesweeper__dificulty-selector" data-difficulty="0">Beginner</button></li>\
+                <li><button class="minesweeper__dificulty-selector" data-difficulty="1">Intermediate</button></li>\
+                <li><button class="minesweeper__dificulty-selector" data-difficulty="2">Expert</button></li>\
+            </ul>';
 
 		outer.appendChild(inner);
 		outer.appendChild(controls);
@@ -106,6 +107,7 @@ class Minesweeper {
 	}
 	
 	generateGame(x, y) {
+
 		var totalBombs = Math.ceil(this.GAME_STATE.TILES_X * this.GAME_STATE.TILES_Y * this.GAME_STATE.BOMB_RATIO);
         
         var bombTiles = [],
@@ -133,7 +135,7 @@ class Minesweeper {
         
         this.GAME_STATE.BOMBS.map((i) => {
             this.updateTileState(i, {isBomb: true});
-            this.GAME_STATE.TILES[i].elem.style.background = "red";
+//            this.GAME_STATE.TILES[i].elem.style.background = "red";
         });
         
 		this.GAME_STATE.GAME_STARTED = true;
@@ -164,10 +166,9 @@ class Minesweeper {
 		for(let i = 0; i < this.GAME_STATE.TILES.length; i++) {
             let tile = this.GAME_STATE.TILES[i];
 			tile.elem = allTiles[i];
+
+            //Left Click
 			tile.elem.addEventListener("click", handleClick.bind(this, tile, i));
-//			tile.elem.addEventListener("click", () => {
-//				console.log(i, this.getTileCoords(i));
-//			});
             
             //Right click
             tile.elem.addEventListener('contextmenu', (e) => {
@@ -178,7 +179,10 @@ class Minesweeper {
 
 		function handleClick(tile, index) {
 
-			console.log(index, this.getTileCoords(index));
+            if(this.GAME_STATE.GAME_OVER) {
+                this.startGame(this.GAME_STATE);
+                return;
+            }
 
 			//Tile is inactive
 			if(tile.isCleared || tile.isFlagged) {
@@ -192,7 +196,7 @@ class Minesweeper {
 
 			//Tile is a bomb -> Game Over
 			else if(tile.isBomb) {
-				this.gameOver();
+				this.gameOver(tile);
 				return;
 			}
 
@@ -208,8 +212,11 @@ class Minesweeper {
 		}
 	}
 
-	gameOver() {
+	gameOver(tile) {
+        this.GAME_STATE.GAME_OVER = true;
 		this.GAME_CONTAINER.className += " game-over";
+        tile.elem.className += " bomb--exploded";
+        this.renderTiles(this.GAME_STATE.BOMBS, true);
 	}
 	
 	getTileCoords(index) {
@@ -220,7 +227,7 @@ class Minesweeper {
 	}
 	
 	getTileIndex(x, y) {
-		return (y * this.GAME_STATE.TILES_Y) + x;
+		return (y * this.GAME_STATE.TILES_X) + x;
 	}
     
     updateTileState(tileIndex, state) {
@@ -236,7 +243,7 @@ class Minesweeper {
 		for(var i = 0; i < this.neighbourOffsets.length; i++) {
 			var xOffset = x + this.neighbourOffsets[i].x, 
 				yOffset = y + this.neighbourOffsets[i].y;
-			
+
 			//If we're out of bounds, continue onto the next iteration
 			if(xOffset < 0 || xOffset > this.GAME_STATE.TILES_X-1 || yOffset < 0 || yOffset > this.GAME_STATE.TILES_Y-1) {
 				continue;
@@ -248,12 +255,15 @@ class Minesweeper {
 		return neighbours;
 	}
 	
-	renderTiles(tiles) {
+	renderTiles(tiles, revealBombs) {
 		tiles.map((index) => {
             var tile = this.GAME_STATE.TILES[index],
                 tileClass = "";
             
-            if(tile.isCleared) {
+            if(revealBombs && tile.isBomb) {
+                tileClass = " is-bomb";
+            }
+            else if(tile.isCleared) {
                 tileClass = " is-cleared";
                 if(tile.neighbouringBombs > 0) {
                     var numBombs = tile.neighbouringBombs;
@@ -267,7 +277,7 @@ class Minesweeper {
             
             tile.elem.className += tileClass;
             
-            if(tile.neighbouringBombs) {
+            if(tile.neighbouringBombs && !revealBombs) {
                 tile.elem.innerHTML = tile.neighbouringBombs;
             }
         });
@@ -280,7 +290,7 @@ class Minesweeper {
 			queue = [{x:x, y:y}],
 			sweptTiles = [],
 			alreadyChecked = [];
-        
+
 		for(var i = 0; i < queue.length; i++) {
 			checkNeighboursForBombs.call(this, queue[i].x, queue[i].y);
 		}
