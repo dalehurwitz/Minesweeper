@@ -6,14 +6,14 @@ A Minesweeper clone built with ES6 JavaScript
 
 ### Setup
 
-`
+```
 npm install
 
 gulp
-`
+```
 
 ### Build (compress JS)
 
-`
+````
 gulp build
-`
+````
