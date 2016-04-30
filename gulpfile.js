@@ -39,7 +39,7 @@ gulp.task("build", function() {
 gulp.task("less", function() {
     return gulp.src(config.mainLess)
         .pipe(less())
-        .pipe(gulp.dest("./"))
+        .pipe(gulp.dest("./dist"))
         .pipe(browserSync.stream());
     
 });
@@ -47,7 +47,7 @@ gulp.task("less", function() {
 gulp.task("browserSync", function() {
 	browserSync.init({
 		server: {
-			baseDir: "./"
+			baseDir: "./dist"
 		}
 	});
 });
