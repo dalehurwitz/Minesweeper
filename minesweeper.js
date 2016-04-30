@@ -342,7 +342,3 @@ class Minesweeper {
 	}
 	
 }
-
-(() => {
-	var minesweeper = new Minesweeper("game");
-})();
