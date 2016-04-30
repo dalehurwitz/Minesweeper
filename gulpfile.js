@@ -3,6 +3,7 @@
 var gulp = require("gulp"),
 	browserSync = require("browser-sync"),
     less = require("gulp-less"),
+    uglify = require("gulp-uglify"),
 	babel = require("gulp-babel");
 
 var config = {
@@ -24,7 +25,16 @@ gulp.task("js", function() {
 		}))
 		.pipe(gulp.dest("./dist"))
 		.pipe(browserSync.stream());
-})
+});
+
+gulp.task("build", function() {
+    return gulp.src(config.js)
+		.pipe(babel({
+			presets: ["es2015"]
+		}))
+        .pipe(uglify())
+		.pipe(gulp.dest("./dist"));
+});
 
 gulp.task("less", function() {
     return gulp.src(config.mainLess)
