@@ -69,8 +69,9 @@ class Minesweeper {
         this.GAME_STATE.CLEARED_TILES = [];
         this.GAME_STATE.BOMB_RATIO = settings.BOMB_RATIO;
         this.GAME_STATE.BOMBS = [];
+        this.GAME_STATE.FLAGGED = [];
         this.GAME_STATE.GAME_STARTED = false;
-        this.GAME_STATE.GAME_COMPLETED = false;
+        this.GAME_STATE.GAME_WON = false;
         this.GAME_STATE.GAME_OVER = false;
     }
 
@@ -156,12 +157,15 @@ class Minesweeper {
 
         //Pick the first 'numBombs' tile index's from the shuffled potentialBombTiles array
         this.GAME_STATE.BOMBS = potentialBombTiles.splice(0, totalBombs);
+        this.GAME_STATE.BOMBS.sort(function(a, b) {
+            return a < b ? -1 : a > b ? 1 : 0;
+        });
 
         this.GAME_STATE.BOMBS.map((i) => {
             this.updateTileState(i, {
                 isBomb: true
             });
-            //            this.GAME_STATE.TILES[i].elem.style.background = "red";
+//            this.GAME_STATE.TILES[i].elem.style.background = "red";
         });
 
         this.GAME_STATE.GAME_STARTED = true;
@@ -205,7 +209,7 @@ class Minesweeper {
 
         function handleClick(tile, index) {
 
-            if (this.GAME_STATE.GAME_OVER) {
+            if (this.GAME_STATE.GAME_OVER || this.GAME_STATE.GAME_OVER.GAME_WON) {
                 this.startGame(this.GAME_STATE);
                 return;
             }
@@ -228,14 +232,51 @@ class Minesweeper {
 
             //Default action
             var tilesToRender = this.sweep(index);
-
             this.renderTiles(tilesToRender);
+
+            if(this.allTilesCleared()) {
+                this.gameWon();
+            }
         }
 
         function handleRightClick(tile, index) {
+
+            if (this.GAME_STATE.GAME_OVER || this.GAME_STATE.GAME_OVER.GAME_WON) {
+                this.startGame(this.GAME_STATE);
+                return;
+            }
+
             tile.isFlagged = !tile.isFlagged;
             this.renderTiles([index]);
+
+            if(tile.isFlagged) {
+                this.GAME_STATE.FLAGGED.push(index);
+            } else {
+                var indexToRemove = this.GAME_STATE.FLAGGED.indexOf(index);
+                this.GAME_STATE.FLAGGED.splice(indexToRemove, 1);
+            }
+
+            if(this.allBombsFlagged()) {
+                this.gameWon();
+            }
         }
+    }
+
+    allBombsFlagged() {
+        if(this.GAME_STATE.FLAGGED.length !== this.GAME_STATE.BOMBS.length) return false;
+
+        this.GAME_STATE.FLAGGED.sort(function(a, b) {
+            return a < b ? -1 : a > b ? 1 : 0;
+        });
+
+        for(var i = 0; i < this.GAME_STATE.FLAGGED.length; i++) {
+            if(this.GAME_STATE.FLAGGED[i] !== this.GAME_STATE.BOMBS[i]) return false;
+        }
+        return true;
+    }
+
+    allTilesCleared() {
+        return this.GAME_STATE.CLEARED_TILES.length === (this.GAME_STATE.TILES.length - this.GAME_STATE.BOMBS.length);
     }
 
     gameOver(tile) {
@@ -243,6 +284,10 @@ class Minesweeper {
         this.GAME_CONTAINER.className += " game-over";
         tile.elem.className += " bomb--exploded";
         this.renderTiles(this.GAME_STATE.BOMBS, true);
+    }
+
+    gameWon() {
+        console.log("Game won!");
     }
 
     getTileCoords(index) {
